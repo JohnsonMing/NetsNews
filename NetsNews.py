@@ -1,5 +1,5 @@
 from flask import Flask, render_template
-# from datetime import datetime
+from datetime import datetime
 from forms import NewsForm
 from flask_sqlalchemy import SQLAlchemy
 
@@ -71,11 +71,16 @@ def add():
             title=form.title.data,
             content=form.content.data,
             types=form.types.data,
-            image=form.image.data
+            image=form.image.data,
+            created_at=datetime.now()
         )
         # 保存数据
         db.session.add(new_obj)
-    return render_template('admin/add.html')
+        db.session.commit()
+        # 文字提示
+        # flash
+        # redirect('')
+    return render_template('admin/add.html', form=form)
 
 
 @app.route('/admin/update/<int:pk>/')
