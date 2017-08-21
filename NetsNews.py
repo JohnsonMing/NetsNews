@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for
 from datetime import datetime
 from forms import NewsForm
 from flask_sqlalchemy import SQLAlchemy
@@ -79,18 +79,31 @@ def add():
         db.session.commit()
         # 文字提示
         # flash
-        # redirect('')
+        return redirect(url_for('admin'))
     return render_template('admin/add.html', form=form)
 
 
-@app.route('/admin/update/<int:pk>/')
+@app.route('/admin/update/<int:pk>/', methods=('GET', 'POST'))
 def update(pk):
     # 更新新闻内容
     new_obj = News.query.get(pk)
-    return render_template('update.html', new_obj=new_obj)
+    # 如果没有数据， 则返回
+    if not new_obj:
+        # TODO 使用Flash进行文字提示用户
+        return redirect(url_for('admin'))
+    form = NewsForm(obj=new_obj)
+    if form.validate_on_submit():
+        # 获取数据
+        new_obj.title = form.title.data
+        new_obj.content = form.content.data
+        # 保存数据
+        db.session.add(new_obj)
+        db.session.commit()
+        return redirect(url_for('admin'))
+    return render_template('admin/update.html', form=form)
 
 
-@app.route('/admin/delete/<int:pk>/')
+@app.route('/admin/delete/<int:pk>/', methods=('GET', 'POST'))
 def delete(pk):
     # 删除新闻内容
     new_obj = News.query.get(pk)
