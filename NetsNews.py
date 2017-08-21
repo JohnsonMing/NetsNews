@@ -57,7 +57,7 @@ def admin(page=None):
     # 新闻管理首页
     if page is None:
         page = 1
-    news_list = News.query.paginate(page=page, per_page=5)
+    news_list = News.query.filter_by(is_valid=True).paginate(page=page, per_page=5)
     return render_template('admin/index.html', news_list=news_list)
 
 
@@ -107,7 +107,12 @@ def update(pk):
 def delete(pk):
     # 删除新闻内容
     new_obj = News.query.get(pk)
-    return render_template('delete.html', new_obj=new_obj)
+    if not new_obj:
+        return 'no'
+    new_obj.is_valid = False
+    db.session.add(new_obj)
+    db.session.commit()
+    return 'yes'
 
 
 if __name__ == '__main__':
